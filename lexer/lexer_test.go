@@ -6,14 +6,35 @@ import (
 	"monkey-interpreter-go/token"
 )
 
+type TestData struct {
+	expectedType    token.TokenType
+	expectedLiteral string
+}
+
+func runTest(t *testing.T, input string, tests []TestData) {
+	t.Helper()
+
+	l := New(input)
+
+	for i, tt := range tests {
+		tok := l.NextToken()
+
+		if tok.Type != tt.expectedType {
+			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q",
+				i, tt.expectedType, tok.Type)
+		}
+		if tok.Literal != tt.expectedLiteral {
+			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
+				i, tt.expectedLiteral, tok.Literal)
+		}
+	}
+}
+
 func TestNextToken(t *testing.T) {
 	t.Run("only special chars", func(t *testing.T) {
 		input := "=+(){},;"
 
-		tests := []struct {
-			expectedType    token.TokenType
-			expectedLiteral string
-		}{
+		tests := []TestData{
 			{token.ASSIGN, "="},
 			{token.PLUS, "+"},
 			{token.LPAREN, "("},
@@ -25,20 +46,7 @@ func TestNextToken(t *testing.T) {
 			{token.EOF, ""},
 		}
 
-		l := New(input)
-
-		for i, tt := range tests {
-			tok := l.NextToken()
-
-			if tok.Type != tt.expectedType {
-				t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q",
-					i, tt.expectedType, tok.Type)
-			}
-			if tok.Literal != tt.expectedLiteral {
-				t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
-					i, tt.expectedLiteral, tok.Literal)
-			}
-		}
+		runTest(t, input, tests)
 	})
 
 	t.Run("simple function in monkey", func(t *testing.T) {
@@ -51,10 +59,7 @@ func TestNextToken(t *testing.T) {
         let result = add(five, ten);
         `
 
-		tests := []struct {
-			expectedType    token.TokenType
-			expectedLiteral string
-		}{
+		tests := []TestData{
 			{token.LET, "let"},
 			{token.IDENT, "five"},
 			{token.ASSIGN, "="},
@@ -94,20 +99,7 @@ func TestNextToken(t *testing.T) {
 			{token.EOF, ""},
 		}
 
-		l := New(input)
-
-		for i, tt := range tests {
-			tok := l.NextToken()
-
-			if tok.Type != tt.expectedType {
-				t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q",
-					i, tt.expectedType, tok.Type)
-			}
-			if tok.Literal != tt.expectedLiteral {
-				t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
-					i, tt.expectedLiteral, tok.Literal)
-			}
-		}
+		runTest(t, input, tests)
 	})
 
 	t.Run("math operators", func(t *testing.T) {
@@ -116,10 +108,7 @@ func TestNextToken(t *testing.T) {
         5 < 10 > 5;
         `
 
-		tests := []struct {
-			expectedType    token.TokenType
-			expectedLiteral string
-		}{
+		tests := []TestData{
 			{token.LET, "let"},
 			{token.IDENT, "result"},
 			{token.ASSIGN, "="},
@@ -145,20 +134,7 @@ func TestNextToken(t *testing.T) {
 			{token.EOF, ""},
 		}
 
-		l := New(input)
-
-		for i, tt := range tests {
-			tok := l.NextToken()
-
-			if tok.Type != tt.expectedType {
-				t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q",
-					i, tt.expectedType, tok.Type)
-			}
-			if tok.Literal != tt.expectedLiteral {
-				t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
-					i, tt.expectedLiteral, tok.Literal)
-			}
-		}
+		runTest(t, input, tests)
 	})
 
 	t.Run("math operators", func(t *testing.T) {
@@ -168,10 +144,7 @@ func TestNextToken(t *testing.T) {
             return false;
             }`
 
-		tests := []struct {
-			expectedType    token.TokenType
-			expectedLiteral string
-		}{
+		tests := []TestData{
 			{token.IF, "if"},
 			{token.LPAREN, "("},
 			{token.INT, "5"},
@@ -192,30 +165,14 @@ func TestNextToken(t *testing.T) {
 			{token.EOF, ""},
 		}
 
-		l := New(input)
-
-		for i, tt := range tests {
-			tok := l.NextToken()
-
-			if tok.Type != tt.expectedType {
-				t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q",
-					i, tt.expectedType, tok.Type)
-			}
-			if tok.Literal != tt.expectedLiteral {
-				t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
-					i, tt.expectedLiteral, tok.Literal)
-			}
-		}
+		runTest(t, input, tests)
 	})
 
 	t.Run("two char operators", func(t *testing.T) {
 		input := `10 == 10;
 		10 != 9;`
 
-		tests := []struct {
-			expectedType    token.TokenType
-			expectedLiteral string
-		}{
+		tests := []TestData{
 			{token.INT, "10"},
 			{token.EQ, "=="},
 			{token.INT, "10"},
@@ -227,19 +184,6 @@ func TestNextToken(t *testing.T) {
 			{token.EOF, ""},
 		}
 
-		l := New(input)
-
-		for i, tt := range tests {
-			tok := l.NextToken()
-
-			if tok.Type != tt.expectedType {
-				t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q",
-					i, tt.expectedType, tok.Type)
-			}
-			if tok.Literal != tt.expectedLiteral {
-				t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
-					i, tt.expectedLiteral, tok.Literal)
-			}
-		}
+		runTest(t, input, tests)
 	})
 }
